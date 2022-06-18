@@ -111,11 +111,11 @@ def handle_data():
             if (len(line) == 0 or len(line) < 0):
                 print("line: ", line)
                 continue
-            for token in line:
+            """for token in line:
                 if token not in id2word:
                     id2word.append(token)
                     word2id[token] = wordnum
-                    wordnum += 1
+                    wordnum += 1"""
             line_y = []
             for item in lineArr:
                 line_y.extend(getList(item))
