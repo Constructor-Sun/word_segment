@@ -36,7 +36,7 @@ def get_param():
 
 
 def set_logger():
-    log_file = os.path.join('save', 'log.txt')
+    log_file = os.path.join('/content/word_segment/save/', 'log.txt')
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.DEBUG,
