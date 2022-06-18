@@ -4,9 +4,9 @@ from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer
 import pickle
 
-BERT_PATH = './pretrained_bert_models/bert-base-chinese'
-INPUT_DATA = "./data/train.txt"
-SAVE_PATH = "./data/datasave.pkl"
+BERT_PATH = '/content/word_segment/pretrained_bert_models/bert-base-chinese'
+INPUT_DATA = "/content/word_segment/data/train.txt"
+SAVE_PATH = "/content/word_segment/data//datasave.pkl"
 id2tag = ['B', 'M', 'E', 'S']  # B：分词头部 M：分词词中 E：分词词尾 S：独立成词
 tag2id = {'B': 0, 'M': 1, 'E': 2, 'S': 3}
 word2id = {}

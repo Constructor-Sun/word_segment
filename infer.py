@@ -25,7 +25,7 @@ def getList(input_str):
     return outpout_str
 
 if __name__ == '__main__':
-    model = torch.load('save/model_0.964787.pkl', map_location=torch.device('cpu'))
+    model = torch.load('/content/word_segment/save/model_epoch_9.pkl', map_location=torch.device('cpu'))
     output = open('cws_result.txt', 'w', encoding="utf-8")
     OUTPUT_PATH = 'test_4_result.txt'
     batch_size = 1
