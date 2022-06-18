@@ -9,10 +9,9 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from model import CWS
 from dataloader import Sentence
-from numba import cuda
+# from numba import cuda
 
-from GPUtil import showUtilization as gpu_usage
-from numba import cuda
+# from GPUtil import showUtilization as gpu_usage
 
 def free_gpu_cache():
     # print("Initial GPU Usage")
@@ -26,11 +25,11 @@ def free_gpu_cache():
 
 def get_param():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
+    parser.add_argument('--bert_path', type=str, default='./pretrained_bert_models/bert-base-chinese/')
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=2)
+    parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
     return parser.parse_args()
@@ -75,7 +74,7 @@ def main(args):
     use_cuda = args.cuda and torch.cuda.is_available()
     print("cuda_available: ", use_cuda)
 
-    with open('/content/word_segment/data/datasave.pkl', 'rb') as inp:
+    with open('data/datasave.pkl', 'rb') as inp:
         word2id = pickle.load(inp)
         id2word = pickle.load(inp)
         tag2id = pickle.load(inp)
