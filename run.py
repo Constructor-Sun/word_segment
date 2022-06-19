@@ -34,7 +34,7 @@ def get_param():
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
-    parser.add_argument('--full_fine_tuning', type=bool, default=False)
+    parser.add_argument('--full_fine_tuning', type=bool, default=True)
     return parser.parse_args()
 
 
