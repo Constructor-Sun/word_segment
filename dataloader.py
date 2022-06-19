@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 class Sentence(Dataset):
     def __init__(self, x, y, batch_size=10):
-        self.tokenizer = BertTokenizer.from_pretrained('./pretrained_bert_models/bert-base-chinese')
+        self.tokenizer = BertTokenizer.from_pretrained('./word_segment/pretrained_bert_models/bert-base-chinese')
         self.data = self.preprocess(x, y)
         self.batch_size = batch_size
         # self.word_pad_idx = 0
