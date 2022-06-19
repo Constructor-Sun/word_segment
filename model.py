@@ -12,7 +12,7 @@ class CWS(BertPreTrainedModel):
 
     def __init__(self, config):
         super(CWS, self).__init__(config)
-        self.bert = BertModel.from_pretrained(config)
+        self.bert = BertModel(config)
         self.embedding_dim = 768
         self.hidden_dim = 256
         # self.vocab_size = vocab_size

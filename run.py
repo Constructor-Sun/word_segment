@@ -25,22 +25,21 @@ def free_gpu_cache():
 
 def get_param():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
     parser.add_argument('--bert_path', type=str, default='./word_segment/pretrained_bert_models/bert-base-chinese')
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--weight_decay', type=float, default=0.01)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=2)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
     parser.add_argument('--full_fine_tuning', type=bool, default=True)
+    parser.add_argument('--load_model', type=bool, default=False)
     return parser.parse_args()
 
 
 def set_logger():
-    # log_file = os.path.join('/content/word_segment/save/', 'log.txt')
-    log_file = os.path.join('./word_segment/save/', 'log.txt')
+    log_file = os.path.join('save', 'log.txt')
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.DEBUG,
@@ -78,8 +77,7 @@ def main(args):
     use_cuda = args.cuda and torch.cuda.is_available()
     print("cuda_available: ", use_cuda)
 
-    # with open('/content/word_segment/data/datasave.pkl', 'rb') as inp:
-    with open('./word_segment/data/datasave.pkl', 'rb') as inp:
+    with open('data/datasave.pkl', 'rb') as inp:
         word2id = pickle.load(inp)
         id2word = pickle.load(inp)
         tag2id = pickle.load(inp)
@@ -89,7 +87,10 @@ def main(args):
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
 
-    model = CWS.from_pretrained(args.bert_path)
+    if args.load_model:
+        model = torch.load('save/model_with_bert.pkl', map_location=torch.device('cuda'))
+    else:
+        model = CWS.from_pretrained(args.bert_path) # args.bert_path
     if use_cuda:
         model = model.cuda()
     print()
@@ -97,7 +98,7 @@ def main(args):
     print()
     for name, param in model.named_parameters():
         logging.debug('%s: %s, require_grad=%s' % (name, str(param.shape), str(param.requires_grad)))
-
+    
     if args.full_fine_tuning:
         # model.named_parameters(): [bert, hidden2tag, crf]
         bert_optimizer = list(model.bert.named_parameters())
@@ -119,7 +120,8 @@ def main(args):
         param_optimizer = list(model.hidden2tag.named_parameters())
         optimizer_grouped_parameters = [{'params': [p for n, p in param_optimizer]}]
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr, weight_decay=args.weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=5, verbose=True)
+
+    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=10, verbose=True)
 
     train_data = DataLoader(
         dataset=Sentence(x_train, y_train),
@@ -127,7 +129,7 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=2
+        num_workers=6
     )
 
     test_data = DataLoader(
@@ -136,13 +138,14 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=2
+        num_workers=6
     )
 
     for epoch in range(args.max_epoch):
         step = 0
         log = []
         train_loss = 0
+        model.train()
         for idx, batch_samples in enumerate(tqdm(train_data)):
             batch_data, batch_token_starts, batch_tags, _, _ = batch_samples
             # assert batch_data.shape[1] < 512
@@ -174,15 +177,14 @@ def main(args):
             # cuda.close()
             # cuda.select_device(0)
 
-            if step % 1000 == 0:
+            if step % 100 == 0:
                 logging.debug('epoch %d-step %d loss: %f' % (epoch, step, sum(log)/len(log)))
-                print('epoch %d-step %d loss: %f' % (epoch, step, sum(log)/len(log)))
                 log = []
+                
         scheduler.step(train_loss)
 
         # save first, then test
-        # path_name = "/content/word_segment/save/model_epoch" + str(epoch) + ".pkl"
-        path_name = "./word_segment/save/model_epoch" + str(epoch) + ".pkl"
+        path_name = "./save/model_epoch" + str(epoch) + ".pkl"
         torch.save(model, path_name)
         logging.info("model has been saved in  %s" % path_name)
 
