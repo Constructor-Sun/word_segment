@@ -77,7 +77,7 @@ def main(args):
     use_cuda = args.cuda and torch.cuda.is_available()
     print("cuda_available: ", use_cuda)
 
-    with open('data/datasave.pkl', 'rb') as inp:
+    with open('./word_segment/data/datasave.pkl', 'rb') as inp:
         word2id = pickle.load(inp)
         id2word = pickle.load(inp)
         tag2id = pickle.load(inp)
