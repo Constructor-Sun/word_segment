@@ -25,7 +25,8 @@ def free_gpu_cache():
 
 def get_param():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
+    # parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
+    parser.add_argument('--bert_path', type=str, default='./word_segment/pretrained_bert_models/bert-base-chinese')
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--weight_decay', type=float, default=0.01)
@@ -38,7 +39,8 @@ def get_param():
 
 
 def set_logger():
-    log_file = os.path.join('/content/word_segment/save/', 'log.txt')
+    # log_file = os.path.join('/content/word_segment/save/', 'log.txt')
+    log_file = os.path.join('./word_segment/save/', 'log.txt')
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.DEBUG,
@@ -76,7 +78,8 @@ def main(args):
     use_cuda = args.cuda and torch.cuda.is_available()
     print("cuda_available: ", use_cuda)
 
-    with open('/content/word_segment/data/datasave.pkl', 'rb') as inp:
+    # with open('/content/word_segment/data/datasave.pkl', 'rb') as inp:
+    with open('./word_segment/data/datasave.pkl', 'rb') as inp:
         word2id = pickle.load(inp)
         id2word = pickle.load(inp)
         tag2id = pickle.load(inp)
@@ -177,7 +180,8 @@ def main(args):
         scheduler.step(train_loss)
 
         # save first, then test
-        path_name = "/content/word_segment/save/model_epoch" + str(epoch) + ".pkl"
+        # path_name = "/content/word_segment/save/model_epoch" + str(epoch) + ".pkl"
+        path_name = "./word_segment/save/model_epoch" + str(epoch) + ".pkl"
         torch.save(model, path_name)
         logging.info("model has been saved in  %s" % path_name)
 
