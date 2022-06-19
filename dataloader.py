@@ -108,9 +108,9 @@ class Sentence(Dataset):
             batch_labels[j][:cur_tags_len] = labels[j]
 
         # convert data to torch LongTensors
-        batch_data = torch.tensor(batch_data, dtype=torch.long)
-        batch_label_starts = torch.tensor(batch_label_starts, dtype=torch.long)
-        batch_labels = torch.tensor(batch_labels, dtype=torch.long)
+        batch_data = torch.tensor(np.array(batch_data), dtype=torch.long)
+        batch_label_starts = torch.tensor(np.array(batch_label_starts), dtype=torch.long)
+        batch_labels = torch.tensor(np.array(batch_labels), dtype=torch.long)
         return [batch_data, batch_label_starts, batch_labels, ori_sents, data_length]
 
 
