@@ -8,8 +8,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 class Sentence(Dataset):
     def __init__(self, x, y, batch_size=10):
-        # self.tokenizer = BertTokenizer.from_pretrained('/content/word_segment/pretrained_bert_models/bert-base-chinese')
-        self.tokenizer = BertTokenizer.from_pretrained('./word_segment/pretrained_bert_models/bert-base-chinese')
+        self.tokenizer = BertTokenizer.from_pretrained('./pretrained_bert_models/bert-base-chinese')
         self.data = self.preprocess(x, y)
         self.batch_size = batch_size
         # self.word_pad_idx = 0
@@ -44,7 +43,7 @@ class Sentence(Dataset):
             for token in line:
                 words.append(self.tokenizer.tokenize(token))
                 word_lens.append(len(token))
-            words = ['[CLS]'] + [item for token in words for item in token] + ['[SEP]']
+            words = ['[CLS]'] + [item for token in words for item in token]
             token_start_idxs = 1 + np.cumsum([0] + word_lens[:-1])
             sentences.append(((self.tokenizer.convert_tokens_to_ids(words), token_start_idxs), line))
             """
@@ -117,8 +116,7 @@ class Sentence(Dataset):
 
 if __name__ == '__main__':
     # test
-    # with open('/content/word_segment/data/datasave.pkl', 'rb') as inp:
-    with open('./word_segment/data/datasave.pkl', 'rb') as inp:
+    with open('./data/datasave.pkl', 'rb') as inp:
         word2id = pickle.load(inp)
         id2word = pickle.load(inp)
         tag2id = pickle.load(inp)
