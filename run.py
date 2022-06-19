@@ -102,7 +102,7 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=6
+        num_workers=2
     )
 
     test_data = DataLoader(
@@ -111,7 +111,7 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=6
+        num_workers=2
     )
 
     for epoch in range(args.max_epoch):
