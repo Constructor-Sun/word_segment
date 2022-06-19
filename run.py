@@ -26,7 +26,7 @@ def free_gpu_cache():
 def get_param():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
-    arser.add_argument('--embedding_dim', type=int, default=768)
+    parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--weight_decay', type=float, default=0.01)
     parser.add_argument('--max_epoch', type=int, default=10)
