@@ -44,7 +44,7 @@ class Sentence(Dataset):
             for token in line:
                 words.append(self.tokenizer.tokenize(token))
                 word_lens.append(len(token))
-            words = ['[CLS]'] + [item for token in words for item in token]
+            words = ['[CLS]'] + [item for token in words for item in token] + ['[SEP]']
             token_start_idxs = 1 + np.cumsum([0] + word_lens[:-1])
             sentences.append(((self.tokenizer.convert_tokens_to_ids(words), token_start_idxs), line))
             """
