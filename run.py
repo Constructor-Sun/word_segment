@@ -129,7 +129,7 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=6
+        num_workers=2
     )
 
     test_data = DataLoader(
@@ -138,7 +138,7 @@ def main(args):
         batch_size=args.batch_size,
         collate_fn=Sentence.collate_fn,
         drop_last=False,
-        num_workers=6
+        num_workers=2
     )
 
     for epoch in range(args.max_epoch):
@@ -184,7 +184,7 @@ def main(args):
         scheduler.step(train_loss)
 
         # save first, then test
-        path_name = "./save/model_epoch" + str(epoch) + ".pkl"
+        path_name = "./word_segment/save/model_epoch" + str(epoch) + ".pkl"
         torch.save(model, path_name)
         logging.info("model has been saved in  %s" % path_name)
 
