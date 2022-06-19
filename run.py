@@ -89,7 +89,7 @@ def main(args):
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
 
-    model = CWS(args.embedding_dim, args.hidden_dim, args.bert_path)
+    model = CWS.from_pretrained(bert_path)
     if use_cuda:
         model = model.cuda()
     print()

@@ -10,18 +10,18 @@ from dataloader import Sentence
 
 class CWS(BertPreTrainedModel):
 
-    def __init__(self, embedding_dim, hidden_dim, config):
+    def __init__(self, config):
         super(CWS, self).__init__(config)
         self.bert = BertModel.from_pretrained(config)
-        # self.embedding_dim = embedding_dim
-        # self.hidden_dim = hidden_dim
+        self.embedding_dim = 768
+        self.hidden_dim = 256
         # self.vocab_size = vocab_size
         # self.tag2id = tag2id
         # self.tagset_size = len(tag2id)
 
         # self.word_embeds = nn.Embedding(vocab_size + 1, embedding_dim)
 
-        self.lstm = nn.LSTM(embedding_dim, self.hidden_dim // 2, num_layers=1,
+        self.lstm = nn.LSTM(self.embedding_dim, self.hidden_dim // 2, num_layers=1,
                             bidirectional=True, batch_first=True)
         self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
 
