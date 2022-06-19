@@ -26,12 +26,14 @@ def free_gpu_cache():
 def get_param():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bert_path', type=str, default='/content/word_segment/pretrained_bert_models/bert-base-chinese')
-    parser.add_argument('--embedding_dim', type=int, default=768)
+    arser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
+    parser.add_argument('--weight_decay', type=float, default=0.01)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--batch_size', type=int, default=2)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
+    parser.add_argument('--full_fine_tuning', type=bool, default=False)
     return parser.parse_args()
 
 
@@ -93,7 +95,27 @@ def main(args):
     for name, param in model.named_parameters():
         logging.debug('%s: %s, require_grad=%s' % (name, str(param.shape), str(param.requires_grad)))
 
-    optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+    if args.full_fine_tuning:
+        # model.named_parameters(): [bert, hidden2tag, crf]
+        bert_optimizer = list(model.bert.named_parameters())
+        hidden2tag_optimizer = list(model.hidden2tag.named_parameters())
+        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in bert_optimizer if not any(nd in n for nd in no_decay)],
+             'weight_decay': args.weight_decay},
+            {'params': [p for n, p in bert_optimizer if any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0},
+            {'params': [p for n, p in hidden2tag_optimizer if not any(nd in n for nd in no_decay)],
+             'lr': args.lr * 5, 'weight_decay': args.weight_decay},
+            {'params': [p for n, p in hidden2tag_optimizer if any(nd in n for nd in no_decay)],
+             'lr': args.lr * 5, 'weight_decay': 0.0},
+            {'params': model.crf.parameters(), 'lr': args.lr * 5}
+        ]
+    # only fine-tune the head hidden2tag
+    else:
+        param_optimizer = list(model.hidden2tag.named_parameters())
+        optimizer_grouped_parameters = [{'params': [p for n, p in param_optimizer]}]
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr, weight_decay=args.weight_decay)
     scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=30, verbose=True)
 
     train_data = DataLoader(
