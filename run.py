@@ -89,7 +89,7 @@ def main(args):
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
 
-    model = CWS(len(word2id), tag2id, args.embedding_dim, args.hidden_dim, args.bert_path)
+    model = CWS(args.embedding_dim, args.hidden_dim, args.bert_path)
     if use_cuda:
         model = model.cuda()
     print()
@@ -176,6 +176,7 @@ def main(args):
 
             if step % 1000 == 0:
                 logging.debug('epoch %d-step %d loss: %f' % (epoch, step, sum(log)/len(log)))
+                print('epoch %d-step %d loss: %f' % (epoch, step, sum(log)/len(log)))
                 log = []
         scheduler.step(train_loss)
 

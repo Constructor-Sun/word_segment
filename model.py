@@ -8,18 +8,18 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_se
 from dataloader import Sentence
 
 
-class CWS(nn.Module):
+class CWS(BertPreTrainedModel):
 
-    def __init__(self, vocab_size, tag2id, embedding_dim, hidden_dim, bert_path):
-        super(CWS, self).__init__()
-        self.bert = BertModel.from_pretrained(bert_path)
-        self.embedding_dim = embedding_dim
-        self.hidden_dim = hidden_dim
-        self.vocab_size = vocab_size
-        self.tag2id = tag2id
-        self.tagset_size = len(tag2id)
+    def __init__(self, embedding_dim, hidden_dim, config):
+        super(CWS, self).__init__(config)
+        self.bert = BertModel.from_pretrained(config)
+        # self.embedding_dim = embedding_dim
+        # self.hidden_dim = hidden_dim
+        # self.vocab_size = vocab_size
+        # self.tag2id = tag2id
+        # self.tagset_size = len(tag2id)
 
-        self.word_embeds = nn.Embedding(vocab_size + 1, embedding_dim)
+        # self.word_embeds = nn.Embedding(vocab_size + 1, embedding_dim)
 
         self.lstm = nn.LSTM(embedding_dim, self.hidden_dim // 2, num_layers=1,
                             bidirectional=True, batch_first=True)
@@ -27,9 +27,15 @@ class CWS(nn.Module):
 
         self.crf = CRF(4, batch_first=True)
 
+        self.init_weights()
+
+    """
+
     def init_hidden(self, batch_size, device):
         return (torch.randn(2, batch_size, self.hidden_dim // 2, device=device),
                 torch.randn(2, batch_size, self.hidden_dim // 2, device=device))
+
+    """
 
     def _get_lstm_features(self, sentence):
         # batch_size, seq_len = sentence.shape[0], sentence.shape[1]
@@ -54,7 +60,7 @@ class CWS(nn.Module):
         sentence = [layer[starts.nonzero().squeeze(1)] for layer, starts in zip(sequence_output, input_token_starts)]
         
         emissions = self._get_lstm_features(sentence)
-        loss = -self.crf(emissions, tags, label_masks, reduction='mean')
+        loss = -self.crf(emissions, tags, label_masks) # reduction='mean'
         return loss
 
     def infer(self, input_data, attention_mask, label_masks):
