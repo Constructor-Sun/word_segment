@@ -18,12 +18,12 @@ class CWS(BertPreTrainedModel):
         # self.vocab_size = vocab_size
         # self.tag2id = tag2id
         # self.tagset_size = len(tag2id)
-
+        self.tagset_size = 4
         # self.word_embeds = nn.Embedding(vocab_size + 1, embedding_dim)
 
         self.lstm = nn.LSTM(self.embedding_dim, self.hidden_dim // 2, num_layers=1,
                             bidirectional=True, batch_first=True)
-        self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
+        self.hidden2tag = nn.Linear(self.hidden_dim, self.tagset_size)
 
         self.crf = CRF(4, batch_first=True)
 
