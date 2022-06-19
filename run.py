@@ -5,7 +5,7 @@ import os
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from torch.optim import Adam
+from torch.optim import Adam, AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from model import CWS
 from dataloader import Sentence
@@ -93,8 +93,8 @@ def main(args):
     for name, param in model.named_parameters():
         logging.debug('%s: %s, require_grad=%s' % (name, str(param.shape), str(param.requires_grad)))
 
-    optimizer = Adam(model.parameters(), lr=args.lr)
-    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=10, verbose=True)
+    optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=30, verbose=True)
 
     train_data = DataLoader(
         dataset=Sentence(x_train, y_train),
@@ -135,7 +135,7 @@ def main(args):
 
             # forward
             loss = model((batch_data, batch_token_starts), attention_mask = batch_masks, label_masks = label_masks, tags = batch_tags)
-            # train_loss += loss.item()
+            train_loss += loss.item()
             log.append(loss.item())
 
             # backward
@@ -149,13 +149,13 @@ def main(args):
             # cuda.close()
             # cuda.select_device(0)
 
-            if step % 100 == 0:
+            if step % 1000 == 0:
                 logging.debug('epoch %d-step %d loss: %f' % (epoch, step, sum(log)/len(log)))
                 log = []
-                scheduler.step(loss)
+        scheduler.step(train_loss)
 
         # save first, then test
-        path_name = "./save/model_epoch" + str(epoch) + ".pkl"
+        path_name = "/content/word_segment/save/model_epoch" + str(epoch) + ".pkl"
         torch.save(model, path_name)
         logging.info("model has been saved in  %s" % path_name)
 
