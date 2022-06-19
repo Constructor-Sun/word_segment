@@ -29,7 +29,7 @@ def get_param():
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
     return parser.parse_args()
