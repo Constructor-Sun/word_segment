@@ -101,6 +101,7 @@ def main(args):
     if args.full_fine_tuning:
         # model.named_parameters(): [bert, hidden2tag, crf]
         bert_optimizer = list(model.bert.named_parameters())
+        lstm_optimizer = list(model.lstm.named_parameters())
         hidden2tag_optimizer = list(model.hidden2tag.named_parameters())
         no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [
@@ -108,6 +109,10 @@ def main(args):
              'weight_decay': args.weight_decay},
             {'params': [p for n, p in bert_optimizer if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0},
+            {'params': [p for n, p in lstm_optimizer if not any(nd in n for nd in no_decay)],
+             'lr': args.lr * 5, 'weight_decay': args.weight_decay},
+            {'params': [p for n, p in lstm_optimizer if any(nd in n for nd in no_decay)],
+             'lr': args.lr * 5, 'weight_decay': 0.0},
             {'params': [p for n, p in hidden2tag_optimizer if not any(nd in n for nd in no_decay)],
              'lr': args.lr * 5, 'weight_decay': args.weight_decay},
             {'params': [p for n, p in hidden2tag_optimizer if any(nd in n for nd in no_decay)],
@@ -119,7 +124,7 @@ def main(args):
         param_optimizer = list(model.hidden2tag.named_parameters())
         optimizer_grouped_parameters = [{'params': [p for n, p in param_optimizer]}]
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr, weight_decay=args.weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=30, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 
     train_data = DataLoader(
         dataset=Sentence(x_train, y_train),
