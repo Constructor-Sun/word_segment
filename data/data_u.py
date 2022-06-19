@@ -130,8 +130,8 @@ def handle_data():
                 print("!!!!!!!!!!!!!!!!!!!line_y: ", line_y)
 
             if (len(line) > 512):
-                sub_x_data = cut_sentence(line, 510, '@')
-                sub_y_data = cut_sentence(line_y, 510, 'S')
+                sub_x_data = cut_sentence(line, 500, '@')
+                sub_y_data = cut_sentence(line_y, 500, 'S')
                 x_data.extend(sub_x_data)
                 y_data.extend(sub_y_data)
                 cut_number += 1
