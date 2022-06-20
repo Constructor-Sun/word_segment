@@ -65,7 +65,7 @@ class Processor:
                 if len(words) > 512:
                     # 直接按最大长度切分
                     sub_word_list = get_sub_list(words, 510 , '@')
-                    sub_label_list = get_sub_list(labels, 510, '')
+                    sub_label_list = get_sub_list(labels, 510, 3)
                     word_list.extend(sub_word_list)
                     label_list.extend(sub_label_list)
                     sep_num += 1

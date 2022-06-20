@@ -120,7 +120,7 @@ class CWS(BertPreTrainedModel):
             # print("logits: ", logits.shape)
             # print("labels: ", labels.shape)
             # print("loss_mask: ", loss_mask.shape)
-            loss = -self.crf(logits, labels, loss_mask)
+            loss = -self.crf(logits, labels, loss_mask, reduction = 'mean')
             outputs = (loss,) + outputs
 
         # contain: (loss), scores
