@@ -89,8 +89,8 @@ def main(args):
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
 
-    processer = Processor()
-    processer.process()
+    processor = Processor()
+    processor.process()
     x_train, x_test, y_train, y_test = load_dev('train')
 
     if args.load_model:
