@@ -31,7 +31,7 @@ def get_param():
     parser.add_argument('--lr', type=float, default=0.005)
     parser.add_argument('--weight_decay', type=float, default=0.01)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=1)
+    parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--cuda', action='store_true', default=True)
     parser.add_argument('--full_fine_tuning', type=bool, default=True)
