@@ -192,7 +192,7 @@ def main(args):
             # forward
             # loss = model((batch_data, batch_token_starts), attention_mask = batch_masks, label_masks = label_masks, tags = batch_tags)
             loss = model((batch_data, batch_token_starts),
-                     token_type_ids=None, attention_mask=batch_masks, labels=batch_tags)
+                     token_type_ids=None, attention_mask=batch_masks, labels=batch_tags)[0]
             train_loss += loss.item()
             log.append(loss.item())
 
