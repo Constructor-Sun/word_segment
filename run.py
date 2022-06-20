@@ -3,6 +3,7 @@ import logging
 import argparse
 import os
 import torch
+from data_process import Processor, load_dev
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer, RobertaTokenizer
@@ -10,7 +11,6 @@ from torch.optim import Adam, AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from model import CWS
 from dataloader import Sentence
-from metrics import f1_score # , bad_case, output_write, output2res
 # from numba import cuda
 
 # from GPUtil import showUtilization as gpu_usage
@@ -88,6 +88,10 @@ def main(args):
         y_train = pickle.load(inp)
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
+
+    processer = Processor()
+    processer.process()
+    x_train, x_test, y_train, y_test = load_dev('train')
 
     if args.load_model:
         model = torch.load('save/model_with_bert.pkl', map_location=torch.device('cuda'))
@@ -222,12 +226,6 @@ def main(args):
         logging.info("model has been saved in  %s" % path_name)
 
         # test
-        val_metrics = evaluate(test_data, model, id2tag)
-        val_f1 = val_metrics['f1']
-        logging.info("Epoch: {}, dev loss: {}, f1 score: {}".format(epoch, val_metrics['loss'], val_f1))
-        print("Epoch: {}, dev loss: {}, f1 score: {}".format(epoch, val_metrics['loss'], val_f1))
-        
-        """
         entity_predict = set()
         entity_label = set()
         with torch.no_grad():
@@ -262,62 +260,6 @@ def main(args):
                 logging.info("recall: 0")
                 logging.info("fscore: 0")
             model.train()
-        """
-
-def evaluate(dev_loader, model, id2tag, mode='dev'):
-    # set model to evaluation mode
-    model.eval()
-
-    id2label = id2tag
-    true_tags = []
-    pred_tags = []
-    sent_data = []
-    dev_losses = 0
-
-    with torch.no_grad():
-        for idx, batch_samples in enumerate(dev_loader):
-            batch_data, batch_token_starts, batch_tags, ori_data, _ = batch_samples
-            # shift tensors to GPU if available
-            batch_data = batch_data.cuda()
-            batch_token_starts = batch_token_starts.cuda()
-            batch_tags = batch_tags.cuda()
-            sent_data.extend(ori_data)
-            batch_masks = batch_data.gt(0)  # get padding mask
-            label_masks = batch_tags.gt(-1)
-            # compute model output and loss
-            loss = model((batch_data, batch_token_starts),
-                         token_type_ids=None, attention_mask=batch_masks, labels=batch_tags)[0]
-            dev_losses += loss.item()
-            # shape: (batch_size, max_len, num_labels)
-            batch_output = model((batch_data, batch_token_starts),
-                                 token_type_ids=None, attention_mask=batch_masks)[0]
-            if mode == 'dev':
-                batch_output = model.crf.decode(batch_output, mask=label_masks)
-            else:
-                # (batch_size, max_len - padding_label_len)
-                batch_output = model.crf.decode(batch_output, mask=label_masks)
-            batch_tags = batch_tags.to('cpu').numpy()
-
-            pred_tags.extend([[id2label[idx] for idx in indices] for indices in batch_output])
-            # (batch_size, max_len - padding_label_len)
-            true_tags.extend([[id2label[idx] for idx in indices if idx > -1] for indices in batch_tags])
-
-    assert len(pred_tags) == len(true_tags)
-    assert len(sent_data) == len(true_tags)
-
-    # logging loss, f1 and report
-    metrics = {}
-    f1, p, r = f1_score(true_tags, pred_tags)
-    metrics['f1'] = f1
-    metrics['p'] = p
-    metrics['r'] = r
-    # if mode != 'dev':
-    #     bad_case(sent_data, pred_tags, true_tags)
-    #     output_write(sent_data, pred_tags)
-    #     output2res()
-    metrics['loss'] = float(dev_losses) / len(dev_loader)
-    return metrics
-
 
 if __name__ == '__main__':
     set_logger()
