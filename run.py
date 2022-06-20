@@ -311,10 +311,10 @@ def evaluate(dev_loader, model, id2tag, mode='dev'):
     metrics['f1'] = f1
     metrics['p'] = p
     metrics['r'] = r
-    if mode != 'dev':
-        bad_case(sent_data, pred_tags, true_tags)
-        output_write(sent_data, pred_tags)
-        output2res()
+    # if mode != 'dev':
+    #     bad_case(sent_data, pred_tags, true_tags)
+    #     output_write(sent_data, pred_tags)
+    #     output2res()
     metrics['loss'] = float(dev_losses) / len(dev_loader)
     return metrics
 

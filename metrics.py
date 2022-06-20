@@ -1,5 +1,4 @@
 import os
-import config
 import logging
 
 
@@ -95,7 +94,7 @@ def f1_score(y_true, y_pred):
     score = 2 * p * r / (p + r) if p + r > 0 else 0
     return score, p, r
 
-
+"""
 def bad_case(sents, preds, tags):
     if not os.path.exists(config.case_dir):
         os.system(r"touch {}".format(config.case_dir))  # 调用系统命令行来创建文件
@@ -109,7 +108,7 @@ def bad_case(sents, preds, tags):
             output.write("golden label: " + str(t) + "\n")
             output.write("model pred: " + str(p) + "\n")
     logging.info("--------Bad Cases reserved !--------")
-
+"""
 
 def calculate(x, y):
     """
@@ -137,8 +136,9 @@ def calculate(x, y):
     return res
 
 
+"""
 def output_write(sents, preds):
-    """write results into output.txt for f1 calculation"""
+    # write results into output.txt for f1 calculation
     with open(config.output_dir, "w") as f:
         for (s, p) in zip(sents, preds):
             res = calculate(s, p)
@@ -147,8 +147,9 @@ def output_write(sents, preds):
                     f.write(w)
                 f.write('  ')
             f.write("\n")
+"""
 
-
+"""
 def f1_test():
     sents = [['机', '器', '人', '迎', '客', '小', '姐', '（', '图', '片', '）'], ['降', '水', '概', '率', '2', '0', '％']]
     tags = [['B', 'M', 'E', 'S', 'S', 'B', 'E', 'S', 'B', 'E', 'S'], ['B', 'E', 'B', 'E', 'B', 'M', 'E']]
@@ -156,10 +157,10 @@ def f1_test():
     score = f1_score(preds, tags)
     print("f1 score: {}".format(score))
     output_write(sents, preds)
-
-
+"""
+"""
 def output2res():
-    """write results into output.txt for f1 calculation"""
+    # write results into output.txt for f1 calculation
     words_list = []
     with open(config.output_dir, 'r', encoding='utf-8') as f:
         inline = False  # 上一句是否还未结束
@@ -179,9 +180,9 @@ def output2res():
     with open(config.res_dir, "w") as f:
         for line in words_list:
             f.write(line)
+"""
 
-
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # f1_test()
-    output2res()
+    # output2res()
 
