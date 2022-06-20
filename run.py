@@ -89,9 +89,15 @@ def main(args):
         x_test = pickle.load(inp)
         y_test = pickle.load(inp)
 
+    print("y_test_len: ", len(y_test))
+    print("y_test[0]: ", y_test[0])
+
     processor = Processor()
     processor.process()
     x_train, x_test, y_train, y_test = load_dev('train')
+
+    print("y_test_len: ", len(y_test))
+    print("y_test[0]: ", y_test[0])
 
     if args.load_model:
         model = torch.load('save/model_with_bert.pkl', map_location=torch.device('cuda'))
