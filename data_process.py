@@ -3,7 +3,7 @@ import re
 import logging
 import numpy as np
 from sklearn.model_selection import train_test_split
-
+tag2id = {'B': 0, 'M': 1, 'E': 2, 'S': 3}
 
 def getlist(input_str):
     """
@@ -61,7 +61,7 @@ class Processor:
                 for item in text:
                     if item == "":
                         continue
-                    labels.extend(getlist(item))
+                    labels.extend(tag2id[item] for item in getlist(item))
                 if len(words) > 512:
                     # 直接按最大长度切分
                     sub_word_list = get_sub_list(words, 510 , '@')
