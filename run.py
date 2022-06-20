@@ -298,9 +298,9 @@ def evaluate(dev_loader, model, id2tag, mode='dev'):
                 batch_output = model.crf.decode(batch_output, mask=label_masks)
             batch_tags = batch_tags.to('cpu').numpy()
 
-            pred_tags.extend([[id2label.get(idx) for idx in indices] for indices in batch_output])
+            pred_tags.extend([[id2label[idx] for idx in indices] for indices in batch_output])
             # (batch_size, max_len - padding_label_len)
-            true_tags.extend([[id2label.get(idx) for idx in indices if idx > -1] for indices in batch_tags])
+            true_tags.extend([[id2label[idx] for idx in indices if idx > -1] for indices in batch_tags])
 
     assert len(pred_tags) == len(true_tags)
     assert len(sent_data) == len(true_tags)
