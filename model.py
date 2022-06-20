@@ -125,3 +125,20 @@ class CWS(BertPreTrainedModel):
 
         # contain: (loss), scores
         return outputs
+
+    def infer(self, input_data, attention_mask, label_masks):
+        input_ids, input_token_starts = input_data
+        outputs = self.bert(input_ids, attention_mask=attention_mask)
+        sequence_output = outputs[0]
+
+        # 去除[CLS]标签等位置，获得与label对齐的pre_label表示
+        origin_sequence_output = [layer[starts.nonzero().squeeze(1)]
+                                  for layer, starts in zip(sequence_output, input_token_starts)]
+        # 将sequence_output的pred_label维度padding到最大长度
+        padded_sequence_output = pad_sequence(origin_sequence_output, batch_first=True)
+        # dropout pred_label的一部分feature
+        padded_sequence_output = self.dropout(padded_sequence_output)
+        lstm_output, _ = self.bilstm(padded_sequence_output)
+        # 得到判别值
+        logits = self.hidden2tag(lstm_output)
+        return self.crf.decode(logits, label_masks)
