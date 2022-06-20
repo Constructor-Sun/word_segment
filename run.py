@@ -10,7 +10,7 @@ from torch.optim import Adam, AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from model import CWS
 from dataloader import Sentence
-from metrics import f1_score, bad_case, output_write, output2res
+from metrics import f1_score # , bad_case, output_write, output2res
 # from numba import cuda
 
 # from GPUtil import showUtilization as gpu_usage
