@@ -276,7 +276,7 @@ def evaluate(dev_loader, model, id2tag, mode='dev'):
 
     with torch.no_grad():
         for idx, batch_samples in enumerate(dev_loader):
-            batch_data, batch_token_starts, batch_tags, ori_data = batch_samples
+            batch_data, batch_token_starts, batch_tags, ori_data, _ = batch_samples
             # shift tensors to GPU if available
             batch_data = batch_data.cuda()
             batch_token_starts = batch_token_starts.cuda()
