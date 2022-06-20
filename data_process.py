@@ -64,8 +64,8 @@ class Processor:
                     labels.extend(tag2id[item] for item in getlist(item))
                 if len(words) > 512:
                     # 直接按最大长度切分
-                    sub_word_list = get_sub_list(words, 510 , '@')
-                    sub_label_list = get_sub_list(labels, 510, 3)
+                    sub_word_list = get_sub_list(words, 510)
+                    sub_label_list = get_sub_list(labels, 510)
                     word_list.extend(sub_word_list)
                     label_list.extend(sub_label_list)
                     sep_num += 1
@@ -147,10 +147,21 @@ def print_len():
         print(lens)
 
 
-def get_sub_list(init_list, sublist_len, sep_word):
-    """直接按最大长度切分"""
+"""def get_sub_list(init_list, sublist_len, sep_word):
+    # 直接按最大长度切分
     list_groups = zip(*(iter(init_list),) * sublist_len)
     end_list = [list(i) + list(sep_word) for i in list_groups]
+    count = len(init_list) % sublist_len
+    if count != 0:
+        end_list.append(init_list[-count:])
+    else:
+        end_list[-1] = end_list[-1][:-1]  # remove the last sep word
+    return end_list"""
+
+def get_sub_list(init_list, sublist_len):
+    """直接按最大长度切分"""
+    list_groups = zip(*(iter(init_list),) * sublist_len)
+    end_list = [list(i) for i in list_groups]
     count = len(init_list) % sublist_len
     if count != 0:
         end_list.append(init_list[-count:])
