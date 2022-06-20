@@ -7,7 +7,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_se
 
 from dataloader import Sentence
 
-
+"""
 class CWS(BertPreTrainedModel):
 
     def __init__(self, config):
@@ -29,13 +29,11 @@ class CWS(BertPreTrainedModel):
 
         self.init_weights()
 
-    """
+    
 
-    def init_hidden(self, batch_size, device):
-        return (torch.randn(2, batch_size, self.hidden_dim // 2, device=device),
-                torch.randn(2, batch_size, self.hidden_dim // 2, device=device))
-
-    """
+    # def init_hidden(self, batch_size, device):
+    #     return (torch.randn(2, batch_size, self.hidden_dim // 2, device=device),
+    #             torch.randn(2, batch_size, self.hidden_dim // 2, device=device))
 
     def _get_lstm_features(self, sentence):
         # batch_size, seq_len = sentence.shape[0], sentence.shape[1]
@@ -70,3 +68,60 @@ class CWS(BertPreTrainedModel):
         sentence = [layer[starts.nonzero().squeeze(1)] for layer, starts in zip(sequence_output, input_token_starts)]
         emissions = self._get_lstm_features(sentence)
         return self.crf.decode(emissions, label_masks)
+"""
+
+class CWS(BertPreTrainedModel):
+    def __init__(self, config):
+        super(CWS, self).__init__(config)
+        self.num_labels = 4
+
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(0.2)
+
+        self.bilstm = nn.LSTM(
+            input_size=768,  # 768
+            hidden_size=1024 // 2,  # 1024 / 2
+            batch_first=True,
+            num_layers=2,
+            dropout=0.5,  # 0.5
+            bidirectional=True
+        )
+
+        self.hidden2tag = nn.Linear(1024, self.num_labels)
+        self.crf = CRF(self.num_labels, batch_first=True)
+
+        self.init_weights()
+
+    def forward(self, input_data, token_type_ids=None, attention_mask=None, labels=None,
+                position_ids=None, inputs_embeds=None, head_mask=None):
+        input_ids, input_token_starts = input_data
+        outputs = self.bert(input_ids,
+                            attention_mask=attention_mask,
+                            token_type_ids=token_type_ids,
+                            position_ids=position_ids,
+                            head_mask=head_mask,
+                            inputs_embeds=inputs_embeds)
+        sequence_output = outputs[0]
+
+        # 去除[CLS]标签等位置，获得与label对齐的pre_label表示
+        origin_sequence_output = [layer[starts.nonzero().squeeze(1)]
+                                  for layer, starts in zip(sequence_output, input_token_starts)]
+        # 将sequence_output的pred_label维度padding到最大长度
+        padded_sequence_output = pad_sequence(origin_sequence_output, batch_first=True)
+        # dropout pred_label的一部分feature
+        padded_sequence_output = self.dropout(padded_sequence_output)
+        lstm_output, _ = self.bilstm(padded_sequence_output)
+        # 得到判别值
+        logits = self.hidden2tag(lstm_output)
+        
+        outputs = (logits,)
+        if labels is not None:
+            loss_mask = labels.gt(-1)
+            # print("logits: ", logits.shape)
+            # print("labels: ", labels.shape)
+            # print("loss_mask: ", loss_mask.shape)
+            loss = -self.crf(logits, labels, loss_mask)
+            outputs = (loss,) + outputs
+
+        # contain: (loss), scores
+        return outputs
